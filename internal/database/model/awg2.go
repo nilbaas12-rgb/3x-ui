@@ -4,69 +4,72 @@ import (
 	"time"
 )
 
-// AWG2Inbound represents an AmneziaWG 2.0 inbound configuration
+// AWG2Inbound represents an AmneziaWG 2.0 inbound configuration in database
 type AWG2Inbound struct {
-	ID              uint      `gorm:"primaryKey"`
-	InboundID       int       `gorm:"index"`
-	Port            uint16
-	Subnet          string // e.g., "10.9.9.1/24"
-	MTU             uint16 // default 1280
-	DisableIPv6     bool
-	AllowedIPsMode  int // 1, 2, 3
-	AllowedIPs      string
+	ID                 uint      `gorm:"primaryKey" json:"id"`
+	InboundID          int       `gorm:"uniqueIndex" json:"inboundId"`
+	Port               uint16    `gorm:"index" json:"port"`
+	Subnet             string    `json:"subnet"`
+	MTU                uint16    `json:"mtu"`
+	OutboundInterface  string    `json:"outboundInterface"`
+	DisableIPv6        bool      `json:"disableIpv6"`
+	AllowedIPsMode     int       `json:"allowedIpsMode"`
+	ServerPrivateKey   string    `json:"serverPrivateKey"`
+	ServerPublicKey    string    `json:"serverPublicKey"`
 
 	// Obfuscation parameters
-	Jc   int
-	Jmin int
-	Jmax int
-	S1   int
-	S2   int
-	S3   int
-	S4   int
-	H1   string
-	H2   string
-	H3   string
-	H4   string
-	I1   string
+	Jc   uint8  `json:"jc"`
+	Jmin uint8  `json:"jmin"`
+	Jmax uint8  `json:"jmax"`
+	S1   uint8  `json:"s1"`
+	S2   uint8  `json:"s2"`
+	S3   uint8  `json:"s3"`
+	S4   uint8  `json:"s4"`
+	H1   string `json:"h1"`
+	H2   string `json:"h2"`
+	H3   string `json:"h3"`
+	H4   string `json:"h4"`
+	I1   string `json:"i1"`
 
-	// Server keys
-	ServerPrivateKey string
-	ServerPublicKey  string
-	Preset           string // e.g., "default"
-	Status           string // running, stopped, error
-	Remarks          string
+	// Status
+	Preset   string `json:"preset"`
+	Status   string `json:"status"`   // created, running, stopped, error
+	Error    string `json:"error"`    // error message if any
+	Remarks  string `json:"remarks"`
 
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	// Metadata
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// AWG2Client represents an AmneziaWG 2.0 client
+// AWG2Client represents an AmneziaWG 2.0 client in database
 type AWG2Client struct {
-	ID           uint      `gorm:"primaryKey"`
-	InboundID    uint      `gorm:"index"`
-	Email        string    `gorm:"index"`
-	PublicKey    string
-	PrivateKey   string
-	AllowedIPs   string // e.g., "10.9.9.2/32"
-	Name         string
-	Enable       bool
-	ExpiryTime   int64 // Unix timestamp in milliseconds
-	UsedTraffic  uint64
-	Download     uint64
-	Upload       uint64
-	Limit        int64 // Total limit in bytes
-	LimitIP      int
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	InboundID    uint      `gorm:"index" json:"inboundId"`
+	Email        string    `gorm:"index" json:"email"`
+	PublicKey    string    `json:"publicKey"`
+	PrivateKey   string    `json:"privateKey"`
+	AllowedIPs   string    `json:"allowedIps"`
+	Name         string    `json:"name"`
+	Enable       bool      `gorm:"default:true" json:"enable"`
+	ExpiryTime   int64     `json:"expiryTime"`     // unix timestamp in milliseconds
+	UsedTraffic  uint64    `gorm:"default:0" json:"usedTraffic"`
+	Download     uint64    `gorm:"default:0" json:"download"`
+	Upload       uint64    `gorm:"default:0" json:"upload"`
+	TrafficLimit int64     `gorm:"default:0" json:"trafficLimit"`
+	IPLimit      int       `gorm:"default:0" json:"ipLimit"`
 
-	CreatedAt int64 // Unix timestamp in milliseconds
-	UpdatedAt int64
+	// Metadata
+	CreatedAt int64 `json:"createdAt"` // unix timestamp in milliseconds
+	UpdatedAt int64 `json:"updatedAt"`
 }
 
-// TableName specifies table name for AWG2Inbound
+// TableName specifies the table name for AWG2Inbound
 func (AWG2Inbound) TableName() string {
 	return "awg2_inbounds"
 }
 
-// TableName specifies table name for AWG2Client
+// TableName specifies the table name for AWG2Client
 func (AWG2Client) TableName() string {
 	return "awg2_clients"
 }
